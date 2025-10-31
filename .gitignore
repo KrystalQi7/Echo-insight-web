@@ -1,0 +1,17 @@
+.env
+.env.*
+*.env
+*.log
+server.log
+server-startup.log
+server.pid
+backend/server.log
+backend/echo_insight.db
+echo_insight.db
+node-v*.tar.gz
+node-v*/
+node_modules/
+.DS_Store
+dist/
+build/
+

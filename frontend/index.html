@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Insight - 回声洞见</title>
+    <link rel="stylesheet" href="styles.css?v=4">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 加载页面 -->
+        <div id="loading" class="page" style="display:none;">
+            <div class="loading-container">
+                <div class="loading-logo">
+                    <div class="logo-icon">🎴</div>
+                    <h1>Echo Insight</h1>
+                    <p>回声洞见</p>
+                </div>
+                <div class="loading-spinner"></div>
+                <p class="loading-text">正在加载...</p>
+            </div>
+        </div>
+
+        <!-- 登录/注册页面 -->
+        <div id="auth" class="page active">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <div class="logo-icon">🎴</div>
+                    <h1>Echo Insight</h1>
+                    <p>开启你的自我探索之旅</p>
+                </div>
+
+                <!-- 登录/注册表单 -->
+                <form id="authForm" class="auth-form active">
+                    <div class="form-group">
+                        <input type="email" id="authEmail" placeholder="邮箱" required class="input-with-icon">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="authPassword" placeholder="密码" required minlength="6" class="input-with-icon">
+                    </div>
+                    <div class="auth-links">
+                        <a href="#" class="link-text" id="forgotPasswordLink">忘记密码？</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large" id="authSubmitBtn">
+                        <span>登录 / 注册</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 邮箱验证页面（新用户注册时） -->
+        <div id="email-verification" class="page">
+            <div class="verification-container">
+                <button class="back-btn" onclick="backToAuth()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                
+                <div class="verification-header">
+                    <h1>验证您的邮箱</h1>
+                    <p>我们刚刚将激活码发送至</p>
+                    <p class="email-display" id="verifyEmailDisplay"></p>
+                    <p class="hint-text">请使用以下代码确认邮箱地址。</p>
+                </div>
+
+                <div class="otp-input-group">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="0">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="1">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="2">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="3">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="4">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="5">
+                </div>
+
+                <div class="resend-section">
+                    <button class="resend-btn" id="resendCodeBtn" disabled>
+                        <i class="fas fa-redo"></i>
+                        <span id="resendCountdown">60s</span>
+                    </button>
+                </div>
+
+                <button class="btn btn-primary btn-large" onclick="verifyEmailCode()">验证代码</button>
+
+                <p class="help-text">如果没有收到代码，请检查垃圾邮件文件夹。</p>
+            </div>
+        </div>
+
+        <!-- 忘记密码页面 -->
+        <div id="forgot-password" class="page">
+            <div class="auth-container forgot-center">
+                <div class="reset-header">
+                    <button type="button" class="btn-back" id="backToLoginBtn">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2>忘记密码</h2>
+                </div>
+
+                <form id="resetPasswordForm" class="auth-form active">
+                    <div class="form-group">
+                        <label for="resetEmail">邮箱</label>
+                        <input type="email" id="resetEmail" placeholder="请输入邮箱" required>
+                    </div>
+                    <div class="form-group code-group">
+                        <label for="resetCode">验证码</label>
+                        <div class="code-input-wrapper">
+                            <input type="text" id="resetCode" placeholder="请输入验证码" maxlength="6" required>
+                            <button type="button" id="sendResetCodeBtn" class="btn-code">发送验证码</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">新密码</label>
+                        <input type="password" id="newPassword" placeholder="至少6位密码" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <span>重置密码</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MBTI选择页面 -->
+        <div id="mbti-selection" class="page">
+            <div class="mbti-container">
+                <div class="mbti-header">
+                    <h1>了解你的性格类型</h1>
+                    <p>选择你的MBTI类型，或通过问卷来发现</p>
+                </div>
+
+                <div class="mbti-options">
+                    <button class="mbti-option" data-action="select">
+                        <i class="fas fa-user"></i>
+                        <span>我知道我的类型</span>
+                    </button>
+                    <button class="mbti-option" data-action="test">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>我想做测试</span>
+                    </button>
+                </div>
+
+                <div class="mbti-skip-section" id="mbtiSkipSection" style="display: none;">
+                    <button class="btn btn-secondary" onclick="skipMbtiAndEnterApp()">暂时跳过，直接进入</button>
+                </div>
+
+                <!-- MBTI类型选择 -->
+                <div id="mbti-types" class="mbti-types-grid" style="display: none;">
+                    <div class="mbti-types-header">
+                        <h2>选择你的MBTI类型</h2>
+                        <button class="btn btn-secondary" onclick="showMbtiOptions()">返回</button>
+                    </div>
+                    <div class="types-grid" id="typesGrid">
+                        <!-- MBTI类型将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+
+                <!-- MBTI测试 -->
+                <div id="mbti-test" class="mbti-test" style="display: none;">
+                    <div class="test-header">
+                        <h2>MBTI性格测试</h2>
+                        <div class="test-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="testProgress"></div>
+                            </div>
+                            <span id="testProgressText">1 / 12</span>
+                        </div>
+                    </div>
+                    <div class="test-content">
+                        <div class="question-card" id="questionCard">
+                            <!-- 问题将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 首次抽卡页面 -->
+        <div id="first-draw" class="page">
+            <div class="first-draw-container">
+                <div class="first-draw-header">
+                    <h1>准备开始你的探索</h1>
+                    <p class="meditation-text">在抽卡之前，请花 10 秒安静下来，轻轻想一想：此刻的你，最想关注什么？</p>
+                </div>
+                
+                <div class="card-stack-container">
+                    <div class="card-stack">
+                        <div class="stack-card" style="--delay: 0s;"></div>
+                        <div class="stack-card" style="--delay: 0.1s;"></div>
+                        <div class="stack-card" style="--delay: 0.2s;"></div>
+                        <div class="stack-card" style="--delay: 0.3s;"></div>
+                        <div class="stack-card" style="--delay: 0.4s;"></div>
+                        <div class="stack-card" style="--delay: 0.5s;"></div>
+                        <div class="stack-card" style="--delay: 0.6s;"></div>
+                        <div class="stack-card" style="--delay: 0.7s;"></div>
+                    </div>
+                    <div class="glow-effect"></div>
+                </div>
+                
+                <div class="first-draw-actions">
+                    <button class="btn btn-primary" onclick="startFirstDraw()">
+                        <i class="fas fa-magic"></i>
+                        开始抽卡
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 欢迎页面 -->
+        <div id="welcome" class="page">
+            <div class="welcome-page-container">
+                <div class="welcome-content">
+                    <div class="welcome-icon">✨</div>
+                    <h1 class="welcome-title">欢迎踏入回声洞见的奇妙旅程</h1>
+                    <p class="welcome-message">在这个内心宇宙里，每一次探索都会产生温柔的回响，引领我们遇见更真实、更完整的自己。</p>
+                    <div class="welcome-slogan">see you now</div>
+                    <div class="welcome-progress">
+                        <div class="progress-dots">
+                            <span class="dot active"></span>
+                            <span class="dot active"></span>
+                            <span class="dot active"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </div>
+                        <p class="progress-text">即将进入探索之旅...</p>
+                    </div>
+                </div>
+                <div class="welcome-background">
+                    <div class="star star-1">✦</div>
+                    <div class="star star-2">✧</div>
+                    <div class="star star-3">✦</div>
+                    <div class="star star-4">✧</div>
+                    <div class="star star-5">✦</div>
+                    <div class="star star-6">✧</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 心情记录页面 -->
+        <div id="mood-recording" class="page">
+            <div class="mood-container">
+                <div class="mood-header">
+                    <h1>记录你的心情</h1>
+                    <p>为了让卡牌更贴合你的当下状态，我们想简单了解一下你今天的心情</p>
+                </div>
+
+                <div class="mood-form">
+                    <div class="mood-question">
+                        <h3>你今天整体的情绪状态是？</h3>
+                        <div class="mood-options">
+                            <button class="mood-option" data-mood="平静">
+                                <span class="emoji">😊</span>
+                                <span>平静/放松</span>
+                            </button>
+                            <button class="mood-option" data-mood="焦虑">
+                                <span class="emoji">😐</span>
+                                <span>焦虑/紧张</span>
+                            </button>
+                            <button class="mood-option" data-mood="低落">
+                                <span class="emoji">😔</span>
+                                <span>低落/疲惫</span>
+                            </button>
+                            <button class="mood-option" data-mood="兴奋">
+                                <span class="emoji">🤩</span>
+                                <span>兴奋/有动力</span>
+                            </button>
+                            <button class="mood-option" data-mood="无聊">
+                                <span class="emoji">🥱</span>
+                                <span>无聊/茫然</span>
+                            </button>
+                            <button class="mood-option" data-mood="压力">
+                                <span class="emoji">🤯</span>
+                                <span>压力大/不堪重负</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mood-question">
+                        <h3>你今天的能量感受如何？</h3>
+                        <div class="energy-options">
+                            <button class="energy-option" data-energy="充沛">
+                                <div class="energy-bar full"></div>
+                                <span>很充沛</span>
+                            </button>
+                            <button class="energy-option" data-energy="中等">
+                                <div class="energy-bar medium"></div>
+                                <span>中等</span>
+                            </button>
+                            <button class="energy-option" data-energy="很低">
+                                <div class="energy-bar low"></div>
+                                <span>很低</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mood-question">
+                        <h3>最近你最关心的是什么？<span class="optional">(可选)</span></h3>
+                        <div class="concern-options">
+                            <label class="concern-option">
+                                <input type="checkbox" value="工作/学业">
+                                <span class="emoji">💼</span>
+                                <span>工作/学业</span>
+                            </label>
+                            <label class="concern-option">
+                                <input type="checkbox" value="人际/关系">
+                                <span class="emoji">❤️</span>
+                                <span>人际/关系</span>
+                            </label>
+                            <label class="concern-option">
+                                <input type="checkbox" value="自我成长">
+                                <span class="emoji">🧘</span>
+                                <span>自我成长</span>
+                            </label>
+                            <label class="concern-option">
+                                <input type="checkbox" value="健康/生活习惯">
+                                <span class="emoji">🌿</span>
+                                <span>健康/生活习惯</span>
+                            </label>
+                            <label class="concern-option">
+                                <input type="checkbox" value="不确定/没头绪">
+                                <span class="emoji">❓</span>
+                                <span>不确定/没头绪</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mood-actions">
+                    <button class="btn btn-secondary" onclick="skipMoodRecording()">跳过，不记录情绪</button>
+                    <button class="btn btn-primary" onclick="submitMoodRecording()">立即探索</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主应用页面 -->
+        <div id="main-app" class="page">
+            <div class="app-container">
+                <!-- 顶部导航（精简，只保留Logo和进入个人中心按钮） -->
+                <header class="app-header">
+                    <div class="header-left">
+                        <div class="logo">🎴 Echo Insight</div>
+                    </div>
+                    <div class="header-right">
+                        <button class="btn-icon" onclick="openPersonalCenter()" title="个人中心">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+                        <button class="btn-icon" onclick="logout()" title="退出">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- 主要内容区域 -->
+                <main class="app-main">
+                    <div class="card-page-layout">
+                        <!-- 主抽卡区域（置于页面正中央，突出行动） -->
+                        <div class="card-section">
+                        <div class="card-container">
+                            <div class="card-header">
+                                <h2>抽取今日卡牌</h2>
+                                <div id="drawCount" class="draw-count-info">今日剩余：3/3次</div>
+                            </div>
+                            <div class="card-area">
+                                <div id="shuffleDeck" class="shuffle-deck" style="display:none;">
+                                    <div class="shuffle-card"></div>
+                                    <div class="shuffle-card" style="animation-delay:0.15s"></div>
+                                    <div class="shuffle-card" style="animation-delay:0.3s"></div>
+                                </div>
+                                <div id="cardPlaceholder" class="card-placeholder">
+                                    <div class="card-icon">🎴</div>
+                                    <p>点击下方按钮抽取你的今日卡牌</p>
+                                </div>
+                                <div id="drawnCard" class="drawn-card" style="display: none;" onclick="flipCard()">
+                                    <!-- 正面：固定主题内容 -->
+                                    <div class="card-face front" id="cardFront">
+                                        <div class="card-content">
+                                            <h3 id="cardTitle"></h3>
+                                            <p id="cardText"></p>
+                                            <div id="cardKeywords" class="pill-row"></div>
+                                            <div class="flip-hint">点击任意位置翻转</div>
+                                        </div>
+                                    </div>
+                                    <!-- 反面：动态生成内容 -->
+                                    <div class="card-face back" id="cardBack">
+                                        <div class="card-content">
+                                            <h3>引导问题</h3>
+                                            <ul id="backQuestions" class="list"></ul>
+                                            <h4 style="margin-top:8px;">行动建议</h4>
+                                            <ul id="backActions" class="list"></ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-actions" id="preDrawActions">
+                                <button class="btn btn-primary" onclick="startRitual()" id="drawCardBtn">
+                                    <i class="fas fa-magic"></i>
+                                    抽取卡牌
+                                </button>
+                            </div>
+                            <!-- 抽卡后显示的并列按钮，保持在同一模块内 -->
+                            <div id="recordNow" class="response-section" style="display: none;">
+                                <div class="response-container" style="text-align:center; box-shadow:none; padding:0; background:transparent;">
+                                    <div class="record-actions">
+                                        <button class="btn btn-secondary" onclick="startRitual()">继续探索</button>
+                                        <button class="btn btn-primary" onclick="startRecord()">记录当下</button>
+                                    </div>
+                                    <div id="genHint" style="display:none; margin-top:8px; color:#888; font-size:13px;">正在生成你的个性化提问与行动建议...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <!-- 侧边栏：记录功能 -->
+                        <div class="sidebar-section">
+                            <!-- 记录当下：心情emoji + 文本输入 -->
+                            <div id="reflectionSection" class="response-section" style="display: none;">
+                                <div class="response-container">
+                                    <h3>记录当下</h3>
+                                    <p>先选择一个此刻最贴近的心情，然后写下你的感受与思考</p>
+                                    <div class="note-mood-picker">
+                                        <button class="mood-chip" data-note-mood="开心">😊 开心</button>
+                                        <button class="mood-chip" data-note-mood="平静">😌 平静</button>
+                                        <button class="mood-chip" data-note-mood="思考">🤔 思考</button>
+                                        <button class="mood-chip" data-note-mood="低落">😔 低落</button>
+                                        <button class="mood-chip" data-note-mood="焦虑">😐 焦虑</button>
+                                    </div>
+                                    <textarea id="userResponse" placeholder="在这里写下你的想法..."></textarea>
+                                    <div class="response-actions">
+                                        <button class="btn btn-primary" onclick="submitResponse()">保存回答</button>
+                                        <button class="btn btn-secondary" onclick="cancelRecord()">取消</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- 个人中心页面：展示进度与历史 -->
+        <div id="personal-center" class="page">
+            <div class="app-container">
+                <header class="app-header">
+                    <div class="header-left">
+                        <div class="logo">🎴 Echo Insight</div>
+                    </div>
+                    <div class="header-right">
+                        <button class="btn-icon" onclick="showPage('main-app')" title="返回抽卡">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <button class="btn-icon" onclick="logout()" title="退出">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </header>
+                <main class="app-main">
+                    <div class="personal-center-layout">
+                        <div class="progress-section">
+                        <div class="progress-card">
+                            <h3>你的进度</h3>
+                            <div class="progress-stats">
+                                <div class="stat">
+                                    <span class="stat-value" id="userLevel">1</span>
+                                    <span class="stat-label">等级</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="userXP">0</span>
+                                    <span class="stat-label">经验值</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="consecutiveDays">0</span>
+                                    <span class="stat-label">连续天数</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="userMbti">未设定</span>
+                                    <span class="stat-label">MBTI类型</span>
+                                    <button class="btn btn-secondary btn-small" id="setMbtiBtn" onclick="goToMbtiSetting()" style="display: none; margin-top: 8px; font-size: 0.8rem; padding: 4px 8px;">设置MBTI</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 起始包进度 -->
+                        <div id="starterProgressContainer" class="progress-card">
+                            <!-- 动态内容由 JavaScript 填充 -->
+                        </div>
+                    </div>
+                    <div class="history-section">
+                        <div class="history-container">
+                            <div class="history-header">
+                                <h3>探索记录</h3>
+                                <div class="filter-controls">
+                                    <select id="cardTypeFilter" onchange="filterHistory()">
+                                        <option value="全部">全部分类</option>
+                                        <option value="情绪类">情绪类</option>
+                                        <option value="成长类">成长类</option>
+                                        <option value="关系类">关系类</option>
+                                        <option value="自我力量类">自我力量类</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="historyList" class="history-list"></div>
+                            <div id="historyEmpty" class="empty-state" style="display:none;">
+                                <span class="emoji">🗂️</span>
+                                <div>还没有探索记录</div>
+                                <div>去抽取一张卡牌，开启你的内心之旅吧。</div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知组件 -->
+    <div id="notification" class="notification">
+        <div class="notification-content">
+            <span id="notificationText"></span>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div id="deleteModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-exclamation-triangle modal-icon"></i>
+                <h3>确认删除</h3>
+            </div>
+            <div class="modal-body">
+                <p>确定删除这条探索记录吗？删除后将无法恢复。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">删除</button>
+            </div>
+        </div>
+    </div>
+    <!-- 全屏抽卡动画遮罩 -->
+    <div id="ritualOverlay" style="display:none; position:fixed; inset:0; background: radial-gradient(120% 120% at 50% 0%, rgba(123,97,255,0.9), rgba(35,24,65,0.96)); z-index:9999; align-items:center; justify-content:center;">
+        <div class="ritual-stage">
+            <div class="ritual-deck"></div>
+            <div class="ritual-card"></div>
+            <div class="ritual-hint">正在为你召唤下一张卡牌...</div>
+        </div>
+        <audio id="ritualAudio" src="https://cdn.jsdelivr.net/gh/naptha/tinysound/tones/bell.mp3"></audio>
+        <audio id="flipAudio" src="https://cdn.jsdelivr.net/gh/naptha/tinysound/tones/card-flip.mp3"></audio>
+    </div>
+    <!-- 兜底：若外部脚本未执行，2.5秒后强制从加载页切换到登录页 -->
+    <script>
+        setTimeout(function () {
+            try {
+                var loading = document.getElementById('loading');
+                var auth = document.getElementById('auth');
+                if (loading && loading.classList.contains('active')) {
+                    loading.classList.remove('active');
+                    if (auth) auth.classList.add('active');
+                }
+            } catch (e) {}
+        }, 2500);
+    </script>
+    <script src="auth-new.js?v=2"></script>
+    <script src="script.js?v=1"></script>
+</body>
+</html>
+
