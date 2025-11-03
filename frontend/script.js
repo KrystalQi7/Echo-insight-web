@@ -4,9 +4,19 @@
 // 根据加载协议确定 API 基址：若以 file:// 打开，强制走本地后端
 const API_BASE = (() => {
   try {
+    // Production: Vercel frontend -> Render backend
+    if (window.location.hostname.includes('vercel.app')) {
+      return 'https://RENDER_BACKEND_URL_PLACEHOLDER';
+    }
+    // Local development: file protocol
     if (window.location && window.location.protocol === 'file:') {
       return 'http://localhost:3000';
     }
+    // Local development: localhost
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:3000';
+    }
+    // Default: same origin
     return window.location.origin || "";
   } catch (_) {
     return "";
