@@ -4,9 +4,9 @@
 // 根据加载协议确定 API 基址：若以 file:// 打开，强制走本地后端
 const API_BASE = (() => {
   try {
-    // Production: Vercel frontend -> Render backend
+    // Production: Vercel frontend -> Railway backend
     if (window.location.hostname.includes('vercel.app')) {
-      return 'https://RENDER_BACKEND_URL_PLACEHOLDER';
+      return 'https://RAILWAY_BACKEND_URL_PLACEHOLDER';
     }
     // Local development: file protocol
     if (window.location && window.location.protocol === 'file:') {
