@@ -142,25 +142,35 @@
           
           return;
         } catch (loginError) {
-          // 如果是密码错误，直接提示
-          if (loginError.message && loginError.message.includes('密码')) {
-            throw loginError;
+          // 区分"用户不存在"和"密码错误"
+          const errorMsg = loginError.message || '';
+          
+          // 如果是密码错误（用户已存在但密码不对），直接提示不进入注册流程
+          if (errorMsg.includes('密码错误') || errorMsg.includes('密码不正确') || errorMsg.includes('password')) {
+            showInputError(passwordInput, '密码错误');
+            throw new Error('邮箱或密码不正确');
           }
           
-          // 如果是用户不存在，进入注册流程
-          console.log('用户不存在，进入注册流程');
+          // 如果明确提示"用户不存在"，则进入注册流程
+          if (errorMsg.includes('用户不存在') || errorMsg.includes('不存在')) {
+            console.log('用户不存在，进入注册流程');
+            
+            // 保存注册信息
+            pendingRegistration = { email, password };
+            
+            // 发送验证码
+            await api('/api/auth/request-otp', {
+              method: 'POST',
+              body: JSON.stringify({ email })
+            });
+            
+            // 显示邮箱验证页面
+            showEmailVerification(email);
+            return;
+          }
           
-          // 保存注册信息
-          pendingRegistration = { email, password };
-          
-          // 发送验证码
-          await api('/api/auth/request-otp', {
-            method: 'POST',
-            body: JSON.stringify({ email })
-          });
-          
-          // 显示邮箱验证页面
-          showEmailVerification(email);
+          // 其他错误（如网络错误、服务器错误等），直接抛出
+          throw loginError;
         }
       } catch (error) {
         notify(error.message || '操作失败');

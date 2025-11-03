@@ -313,7 +313,7 @@ app.post('/api/login', async (req, res) => {
 
     if (!validPassword) {
       console.log('❌ 密码错误');
-      return res.status(401).json({ error: '用户不存在' });
+      return res.status(401).json({ error: '密码错误' });
     }
     
     console.log('✅ 登录成功');
